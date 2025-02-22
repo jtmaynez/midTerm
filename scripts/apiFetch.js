@@ -59,7 +59,7 @@ function displayResults(results) {
   resultsElement.appendChild(list);
 }
 
-// Display pics and species Struglled and understood the least Step 4
+// Display pics and species
 function displayIdentifications(identifications) {
   const identificationsElement = document.getElementById("identifications");
   identificationsElement.innerHTML = ""; // Clear previous results
@@ -70,25 +70,14 @@ function displayIdentifications(identifications) {
   }
 
   identifications.forEach((identification) => {
-    console.log("Identification Object:", identification); // Debugging
-
-    // Extract correct species name
     const speciesName =
       identification?.taxon?.preferred_common_name ||
       identification?.taxon?.name ||
       "Unknown Species";
 
-    // Extract correct image URL (check all possible sources)
     const imageUrl =
-      identification?.taxon?.default_photo?.medium_url ||
-      identification?.taxon?.default_photo?.square_url ||
-      identification?.taxon?.default_photo?.large_url ||
-      "";
-
-    if (!imageUrl) {
-      console.warn(`No image for: ${speciesName}`); // Debugging
-      return; // Skip species without an image
-    }
+      identification?.taxon?.default_photo?.medium_url || // Corrected image property
+      "https://placehold.co/150"; // Fallback image
 
     // Create card
     const card = document.createElement("div");
