@@ -15,18 +15,18 @@
     <main>
       <h1>iNaturalist API Connection</h1>
       <h3>Search for a Place</h3>
-      <form id="place-form">
-        <input
-          type="text"
-          id="place-input"
-          placeholder="Enter a place"
-          required
-        />
-        <button type="submit">Search</button>
-      </form>
-      <div id="results"></div>
-      <h2>Identifications</h2>
-      <div id="identifications"></div>
+      <section class="place">
+
+      <label for="place">Place</label>
+      <input id="place"/>   <button id="search">Search</button>
+      <ul id="pList"></ul>
+       <!--Why use id instead of type  -->
+        </form>
+      </section>
+      <section class="description">
+        <ul id="description"></ul>
+      </section>
+     
     </main>
     <footer></footer>
   </body>
