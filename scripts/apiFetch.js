@@ -1,63 +1,107 @@
 /** @format */
 
+// Base URL for the iNaturalist API
 const baseUrl = "https://api.inaturalist.org/v1/";
-const searchButton = document.querySelector("#search");
-const listElem = document.querySelector("#pList");
-const descriptionElem = document.querySelector("#description");
 
+// Selecting the search button, place list, and description elements from the DOM
+const searchButton = document.querySelector("#search"); // Button to trigger place search
+const listElem = document.querySelector("#pList"); // List where places will be displayed
+const descriptionElem = document.querySelector("#description"); // Section where identifications will be displayed
+
+/**
+ * Fetches data from the given API URL
+ * @param {string} url - The API endpoint to fetch data from
+ * @returns {Promise<Object>} - Parsed JSON data from the response
+ */
 async function getInfo(url) {
-  const res = await fetch(url);
+  const res = await fetch(url); // Fetch the data from the API
   if (res.ok) {
-    const data = await res.json();
-    return data;
+    const data = await res.json(); // Convert the response to JSON
+    return data; // Return the fetched data
   }
 }
 
+/**
+ * Organizes the list of identifications by extracting relevant details
+ * @param {Array} list - List of identification objects from the API
+ * @returns {Array} - A new list with only the relevant identification data
+ */
 function organize(list) {
   const organizeList = list.map((item) => {
     return {
-      name: item.observation.taxon.preferred_common_name,
-      image: item.observation.taxon.default_photo.medium_url,
-      taxon_id: item.taxon_id,
+      name: item.observation.taxon.preferred_common_name, // Common name of the species
+      image: item.observation.taxon.default_photo.medium_url, // Image URL
+      taxon_id: item.taxon_id, // Unique taxonomic ID
     };
   });
-  return organizeList;
+  return organizeList; // Return the cleaned-up list
 }
 
+/**
+ * Generates an HTML template for a place list item
+ * @param {Object} place - A place object with an ID and display name
+ * @returns {string} - HTML template for a single place list item
+ */
 function placeTemplate(place) {
-  return `<li data-id="${place.id}">${place.display_name}</li>`;
+  return `<li data-id="${place.id}">${place.display_name}</li>`; // Generates an interactive list item
 }
 
+/**
+ * Generates an HTML template for an identification item (species card)
+ * @param {Object} ident - An identification object containing name and image
+ * @returns {string} - HTML template for a species card
+ */
 function identifyTemplate(ident) {
   return `<li> 
       <img src="${ident.image}">
       <h2>${ident.name}</h2>
       </li>`;
 }
+
+/**
+ * Renders a list of items inside a given HTML element
+ * @param {Array} list - The list of items to render
+ * @param {HTMLElement} element - The DOM element where the list will be inserted
+ * @param {Function} template - Function to generate the HTML template for each item
+ */
 function renderList(list, element, template) {
-  const html = list.map((item) => template(item));
-  element.innerHTML = html.join("");
+  const html = list.map((item) => template(item)); // Convert each item into its HTML representation
+  element.innerHTML = html.join(""); // Insert all items into the element
 }
 
+/**
+ * Searches for places based on user input and updates the UI
+ * @param {Event} e - The event object from the click event
+ */
 async function searchPlace(e) {
-  const q = document.querySelector("#place").value;
-  const data = await getInfo(baseUrl + `places/autocomplete?q=${q}`);
-  renderList(data.results, listElem, placeTemplate);
+  const q = document.querySelector("#place").value; // Get the search query from input field
+  const data = await getInfo(baseUrl + `places/autocomplete?q=${q}`); // Fetch places based on user input
+  renderList(data.results, listElem, placeTemplate); // Display the fetched places in the list
 }
 
+/**
+ * Fetches identifications for a selected place and updates the UI
+ * @param {Event} e - The event object from clicking a place
+ */
 async function getIdenByPlace(e) {
-  const id = e.target.dataset.id;
+  const id = e.target.dataset.id; // Get the selected place ID from the clicked list item
   const data = await getInfo(
     baseUrl +
       `identifications?current=true&place_id=${id}&order=desc&order_by=created_at`
-  );
-  const organiz = organize(data.results);
-  // const distinct = deDuplicate(organize)
-  renderList(organiz, descriptionElem, identifyTemplate);
-  // console.log(organiz);
+  ); // Fetch identifications for the selected place
+
+  const organiz = organize(data.results); // Organize the raw identification data
+  // const distinct = deDuplicate(organize)  // (Commented out) Could be used for removing duplicate species
+  renderList(organiz, descriptionElem, identifyTemplate); // Display species identifications in the UI
+  // console.log(organiz);  // Debugging: Logs organized identifications
 }
+
+// Event listener for the search button to trigger place search
 searchButton.addEventListener("click", searchPlace);
+
+// Event listener for place selection to fetch identifications
 listElem.addEventListener("click", getIdenByPlace);
+
 // // stretch remove duplicates
 // function deDuplicate(list) {
 //   const filtered = list.filter(
